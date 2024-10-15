@@ -1,6 +1,7 @@
 import torch
 import os
 import comfy.utils
+import execution_context
 import folder_paths
 import numpy as np
 import math
@@ -137,15 +138,16 @@ def _set_model_patch_replace(model, patch_kwargs, key):
 
 class InstantIDModelLoader:
     @classmethod
-    def INPUT_TYPES(s):
-        return {"required": { "instantid_file": (folder_paths.get_filename_list("instantid"), )}}
+    def INPUT_TYPES(s, context: execution_context.ExecutionContext):
+        return {"required": { "instantid_file": (folder_paths.get_filename_list(context, "instantid"), )},
+                "hidden": {"context": "EXECUTION_CONTEXT"}}
 
     RETURN_TYPES = ("INSTANTID",)
     FUNCTION = "load_model"
     CATEGORY = "InstantID"
 
-    def load_model(self, instantid_file):
-        ckpt_path = folder_paths.get_full_path("instantid", instantid_file)
+    def load_model(self, instantid_file, context: execution_context.ExecutionContext):
+        ckpt_path = folder_paths.get_full_path(context, "instantid", instantid_file)
 
         model = comfy.utils.load_torch_file(ckpt_path, safe_load=True)
 
